@@ -4,6 +4,7 @@ import Hero from './Hero';
 import Features from './Features';
 import Collection from './Collection';
 import About from './About';
+import Contact from './Contact';
 import Footer from './Footer';
 
 const LandingPage = () => {
@@ -14,6 +15,7 @@ const LandingPage = () => {
       <Features />
       <Collection />
       <About />
+      <Contact />
       <Footer />
     </div>
   );

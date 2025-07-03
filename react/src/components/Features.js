@@ -1,5 +1,6 @@
 import React from 'react';
 import { Box, Typography, Grid } from '@mui/material';
+import { motion } from 'framer-motion';
 
 const featureData = [
   {
@@ -17,28 +18,69 @@ const featureData = [
 ];
 
 const Features = () => {
+  const fadeInUp = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.8 } },
+  };
+
+  const staggerChildren = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.3,
+      },
+    },
+  };
+
   return (
     <Box
       className="section"
       sx={{
         backgroundColor: '#EDE4D3',
         padding: { xs: '60px 20px', md: '80px 40px' },
+        minHeight: '100vh',
       }}
     >
-      <Typography variant="h2" gutterBottom sx={{ fontSize: { xs: '2rem', md: '2.5rem' }, marginBottom: '50px' }}>
-        Why Choose LIANE?
-      </Typography>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8 }}
+        viewport={{ once: true }}
+      >
+        <Typography variant="h2" gutterBottom sx={{ fontSize: { xs: '2rem', md: '2.5rem' }, marginBottom: '50px', textAlign: 'center' }}>
+          Why Choose LIANE?
+        </Typography>
+      </motion.div>
       <Grid container spacing={4} justifyContent="center">
         {featureData.map((feature, index) => (
           <Grid item xs={12} sm={6} md={4} key={index}>
-            <Box sx={{ textAlign: 'center', padding: '20px' }}>
-              <Typography variant="h3" sx={{ fontSize: '1.5rem', fontWeight: 400, marginBottom: '15px' }}>
-                {feature.title}
-              </Typography>
-              <Typography variant="body1" sx={{ fontSize: '1rem' }}>
-                {feature.description}
-              </Typography>
-            </Box>
+            <motion.div
+              variants={staggerChildren}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+            >
+              <motion.div
+                variants={fadeInUp}
+                style={{
+                  textAlign: 'center',
+                  padding: '20px',
+                  backgroundColor: index % 2 === 0 ? '#F5F5DC' : '#E0D9C8',
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'center',
+                }}
+              >
+                <Typography variant="h3" sx={{ fontSize: '1.5rem', fontWeight: 400, marginBottom: '15px' }}>
+                  {feature.title}
+                </Typography>
+                <Typography variant="body1" sx={{ fontSize: '1rem' }}>
+                  {feature.description}
+                </Typography>
+              </motion.div>
+            </motion.div>
           </Grid>
         ))}
       </Grid>
