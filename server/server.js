@@ -1,37 +1,39 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const bodyParser = require('body-parser');
 
 const apiRoutes = require('./apiRoutes');
 
-// Для работы с express
+// Initialize Express app
 const app = express();
 
+// Middleware to parse JSON bodies
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
+// Mount API routes
 app.use('/api', apiRoutes);
 
-/**
- * Пример создания и записи данных в базу данных
- */
-const MONGO_URI = process.env.MONGO_URI;
+// MongoDB connection
+const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/liane';
 
-const mongoDb = mongoose.createConnection(MONGO_URI);
-
-mongoDb
-  .asPromise()
+mongoose.connect(MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+})
   .then(() => {
-    console.log('MongoDB connected');
+    console.log('MongoDB connected successfully');
   })
   .catch((err) => {
     console.error('MongoDB connection error:', err);
   });
 
-// const MongoTestSchema = new mongoose.Schema({
-//   value: { type: String, required: true },
-// });
+// Define port
+const PORT = process.env.PORT || 3000;
 
-// const MongoModelTest = global.mongoDb.model('Test', MongoTestSchema);
+// Start server
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
 
-// const newTest = new MongoModelTest({
-//   value: 'test-value',
-// });
-
-// newTest.save();
+module.exports = app;
