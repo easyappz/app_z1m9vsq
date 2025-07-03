@@ -8,7 +8,9 @@ const productSchema = new mongoose.Schema({
   name: { type: String, required: true },
   description: { type: String, required: true },
   price: { type: Number, required: true },
-  imageUrl: { type: String, required: false }
+  imageUrl: { type: String, required: false },
+  category: { type: String, required: false },
+  createdAt: { type: Date, default: Date.now }
 });
 
 // Define Contact Message Schema
@@ -41,41 +43,76 @@ router.get('/status', (req, res) => {
 // GET /api/products - Get all products
 router.get('/products', async (req, res) => {
   try {
-    const products = await Product.find();
-    res.json(products);
+    const products = await Product.find().sort({ createdAt: -1 });
+    res.json({
+      success: true,
+      data: products,
+      total: products.length
+    });
   } catch (error) {
-    console.error('Error fetching products:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
-// POST /api/products - Create a new product
-router.post('/products', async (req, res) => {
-  try {
-    const { name, description, price, imageUrl } = req.body;
-    if (!name || !description || price === undefined) {
-      return res.status(400).json({ error: 'Missing required fields' });
-    }
-    const newProduct = new Product({ name, description, price, imageUrl });
-    const savedProduct = await newProduct.save();
-    res.status(201).json(savedProduct);
-  } catch (error) {
-    console.error('Error creating product:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error('Error fetching products:', error.message);
+    res.status(500).json({
+      success: false,
+      error: 'Internal server error',
+      details: error.message
+    });
   }
 });
 
 // GET /api/products/:id - Get a product by ID
 router.get('/products/:id', async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id);
-    if (!product) {
-      return res.status(404).json({ error: 'Product not found' });
+    const productId = req.params.id;
+    if (!mongoose.Types.ObjectId.isValid(productId)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid product ID'
+      });
     }
-    res.json(product);
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        error: 'Product not found'
+      });
+    }
+    res.json({
+      success: true,
+      data: product
+    });
   } catch (error) {
-    console.error('Error fetching product:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error('Error fetching product:', error.message);
+    res.status(500).json({
+      success: false,
+      error: 'Internal server error',
+      details: error.message
+    });
+  }
+});
+
+// POST /api/products - Create a new product
+router.post('/products', async (req, res) => {
+  try {
+    const { name, description, price, imageUrl, category } = req.body;
+    if (!name || !description || price === undefined) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing required fields'
+      });
+    }
+    const newProduct = new Product({ name, description, price, imageUrl, category });
+    const savedProduct = await newProduct.save();
+    res.status(201).json({
+      success: true,
+      data: savedProduct
+    });
+  } catch (error) {
+    console.error('Error creating product:', error.message);
+    res.status(500).json({
+      success: false,
+      error: 'Internal server error',
+      details: error.message
+    });
   }
 });
 
@@ -84,14 +121,25 @@ router.post('/contact', async (req, res) => {
   try {
     const { name, email, message } = req.body;
     if (!name || !email || !message) {
-      return res.status(400).json({ error: 'Missing required fields' });
+      return res.status(400).json({
+        success: false,
+        error: 'Missing required fields'
+      });
     }
     const newMessage = new ContactMessage({ name, email, message });
     const savedMessage = await newMessage.save();
-    res.status(201).json(savedMessage);
+    res.status(201).json({
+      success: true,
+      data: savedMessage,
+      message: 'Contact form submitted successfully'
+    });
   } catch (error) {
-    console.error('Error submitting contact form:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error('Error submitting contact form:', error.message);
+    res.status(500).json({
+      success: false,
+      error: 'Internal server error',
+      details: error.message
+    });
   }
 });
 
@@ -99,10 +147,18 @@ router.post('/contact', async (req, res) => {
 router.get('/contact', async (req, res) => {
   try {
     const messages = await ContactMessage.find().sort({ createdAt: -1 });
-    res.json(messages);
+    res.json({
+      success: true,
+      data: messages,
+      total: messages.length
+    });
   } catch (error) {
-    console.error('Error fetching contact messages:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error('Error fetching contact messages:', error.message);
+    res.status(500).json({
+      success: false,
+      error: 'Internal server error',
+      details: error.message
+    });
   }
 });
 
